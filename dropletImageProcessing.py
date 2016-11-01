@@ -14,6 +14,7 @@ from PIL import Image, ImageFilter
 import numpy
 import time
 import pdb
+import sys
 
 #These roughly indicate the boundary where the droplet should be. If set to the image size, it will take longer to compute
 RELEVANTUPPERLIMIT = 68
@@ -22,8 +23,8 @@ RELEVANTLEFTLIMIT = 0
 RELEVANTRIGHTLIMIT = 475
 
 #tolerance to identify difference in pixels intensity.
-toleranceContour = 230#230 for 400
-#toleranceContour = 130#130 for everything else
+#toleranceContour = 230#230 for darker lighting (eg ./flow_400_c)
+toleranceContour = 130#130 for regular lighting
 
 #Constants from the image
 pixelCapillary = 79
@@ -31,23 +32,10 @@ pixelDiameter = 360
 umPerPixel = 4.55
 
 
-def main():
+def main(directory= './Sample videos/flow_300_c/',filePrefix = 'sample-',nFiles=47):
     start = time.clock()
-##    array = processBMP('/Axel/Projects/Flow calculation/Sample videos/images/foo2-002.bmp','/Axel/Projects/Flow calculation/Sample videos/images/out_foo2-002.bmp')
-##    array = processBMP('/Axel/Projects/Flow calculation/Sample videos/images/foo2-003.bmp','/Axel/Projects/Flow calculation/Sample videos/images/out_foo2-003.bmp')
 
-##    array = processBMP('/Axel/Projects/Flow calculation/Sample videos/flow_200_c/foo2-021.bmp','/Axel/Projects/Flow calculation/Sample videos/flow_200_c/out-021.bmp', True)
-
-##    array = processBMP('/Axel/Projects/Flow calculation/Sample videos/flow_200_c/foo2-022.bmp','/Axel/Projects/Flow calculation/Sample videos/flow_200_c/out-022.bmp', True)
-
-##    array = processBMP('/Axel/Projects/Flow calculation/Sample videos/flow_300_c/foo2-047.bmp','/Axel/Projects/Flow calculation/Sample videos/flow_300_c/out-047.bmp', True)
-
-
-
-    #volumeArray,volumeDiffArray, volumeDiffArrayNeg, volumeArrayDropOnly,volumeDiffArrayDropOnly,volumeDiffArrayNegDropOnly, volumeArrayDropOnlyAsEllipsoid, volumeDiffArrayDropOnlyAsEllipsoid ,volumeDiffArrayNegDropOnlyAsEllipsoid = processFiles('/Axel/Projects/Flow calculation/Sample videos/flow_100_c/','foo2-',77)
-    #volumeArray,volumeDiffArray, volumeDiffArrayNeg, volumeArrayDropOnly,volumeDiffArrayDropOnly,volumeDiffArrayNegDropOnly, volumeArrayDropOnlyAsEllipsoid, volumeDiffArrayDropOnlyAsEllipsoid ,volumeDiffArrayNegDropOnlyAsEllipsoid = processFiles('/Axel/Projects/Flow calculation/Sample videos/flow_200_c/','foo2-',64)
-    #volumeArray,volumeDiffArray, volumeDiffArrayNeg, volumeArrayDropOnly,volumeDiffArrayDropOnly,volumeDiffArrayNegDropOnly, volumeArrayDropOnlyAsEllipsoid, volumeDiffArrayDropOnlyAsEllipsoid ,volumeDiffArrayNegDropOnlyAsEllipsoid = processFiles('/Axel/Projects/Flow calculation/Sample videos/flow_300_c/','foo2-',47)
-    volumeArray,volumeDiffArray, volumeDiffArrayNeg, volumeArrayDropOnly,volumeDiffArrayDropOnly,volumeDiffArrayNegDropOnly, volumeArrayDropOnlyAsEllipsoid, volumeDiffArrayDropOnlyAsEllipsoid ,volumeDiffArrayNegDropOnlyAsEllipsoid = processFiles('/Axel/Projects/Flow calculation/Sample videos/flow_400_c/','foo2-',53)
+    volumeArray,volumeDiffArray, volumeDiffArrayNeg, volumeArrayDropOnly,volumeDiffArrayDropOnly,volumeDiffArrayNegDropOnly, volumeArrayDropOnlyAsEllipsoid, volumeDiffArrayDropOnlyAsEllipsoid ,volumeDiffArrayNegDropOnlyAsEllipsoid = processFiles(directory, filePrefix, nFiles)
     end = time.clock()
     print "Time: " + str(end-start)
     saveVolumeDiffArrayOnFile(volumeDiffArray,volumeDiffArrayNeg,volumeArray,"dropAndCapillar")
@@ -61,8 +49,6 @@ def main():
 
     #return array[0]
 
-if __name__ == '__main__':
-    main()
 
 def processFiles(directory,filePrefix,nFiles):
     volumeArray = []
@@ -483,3 +469,11 @@ def saveVolumeDiffArrayOnFile(arr,arr2,arr3,prefix):
         f.write(str(elem) + '\n')
     f.close()
 
+if __name__ == '__main__':
+    if len(sys.argv)==1:
+        main()
+    elif len(sys.argv)==5:
+        toleranceContour = int(sys.argv[4])
+        main(sys.argv[1], sys.argv[2], int(sys.argv[3]))
+    else:
+        print "Provide as arguments [input directory], [file prefix], [# files] and [tolerance contour]. No arguments for default behaviour"
